@@ -10,7 +10,6 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 	Initialize(windowSizeX, windowSizeY);
 }
 
-
 Renderer::~Renderer()
 {
 }
