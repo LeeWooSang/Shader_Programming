@@ -29,15 +29,18 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float rect[]
-		=
+	float rect[] =
 	{
 		-0.5, -0.5, 0.f, -0.5, 0.5, 0.f, 0.5, 0.5, 0.f, //Triangle1
 		-0.5, -0.5, 0.f,  0.5, 0.5, 0.f, 0.5, -0.5, 0.f, //Triangle2
 	};
 
+	// id : m_VBORect
 	glGenBuffers(1, &m_VBORect);
+	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18, rect, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 }
 
@@ -273,8 +276,10 @@ void Renderer::Test()
 	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	// Array에서 3개씩 끊어서 하나의 정점을 구성해라
+	// stride : sizeof(float) * 3 : 각각 데이터 타입의 크기를 주고, 개수를 곱해야 함
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-
+	// 정점 6개를 삼각형으로 그리도록 명령
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
