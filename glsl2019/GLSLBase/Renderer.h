@@ -32,7 +32,7 @@ private:
 	
 	void CreateVertexBufferObjects();
 	void CreateParticleBuffer();
-	void CreateProxyGeometry();
+	void CreateGridMesh();
 
 	unsigned char* loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight);
 
@@ -50,7 +50,7 @@ private:
 	int m_ParticleCount = 1000;
 	GLuint m_VBOParticle = 0;
 
-	GLuint m_VBO_ProxyGeo = 0;
-	int m_Count_ProxyGeo = 0;
+	GLuint m_VBOGridMesh = 0;
+	int m_Count_GridMesh = 0;
 };
 

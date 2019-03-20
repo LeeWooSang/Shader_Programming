@@ -56,9 +56,9 @@ int main(int argc, char **argv)
 
 	glewInit();
 	if (glewIsSupported("GL_VERSION_4_6"))
-		cout << " GL Version is 4.6\n ";
+		cout << " GL Version is 4.6" << endl;
 	else
-		cout << "GLEW 4.6 not supported\n ";
+		cout << "GLEW 4.6 not supported" << endl;
 
 	// Initialize Renderer
 	g_Renderer = new Renderer(g_WindowSizeX, g_WindowSizeY);

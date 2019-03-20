@@ -27,7 +27,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	//CreateVertexBufferObjects();
 	//CreateParticleBuffer();
-	CreateProxyGeometry();
+	CreateGridMesh();
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -104,7 +104,7 @@ void Renderer::CreateParticleBuffer()
 	delete[] m_ParticleVertex;
 }
 
-void Renderer::CreateProxyGeometry()
+void Renderer::CreateGridMesh()
 {
 	float basePosX = -0.5f;
 	float basePosY = -0.5f;
@@ -119,7 +119,7 @@ void Renderer::CreateProxyGeometry()
 
 	float* point = new float[pointCountX*pointCountY * 2];
 	float* vertices = new float[(pointCountX - 1)*(pointCountY - 1) * 2 * 3 * 3];
-	m_Count_ProxyGeo = (pointCountX - 1) * (pointCountY - 1) * 2 * 3;
+	m_Count_GridMesh = (pointCountX - 1) * (pointCountY - 1) * 2 * 3;
 
 	//Prepare points
 	for (int x = 0; x < pointCountX; x++)
@@ -179,8 +179,8 @@ void Renderer::CreateProxyGeometry()
 		}
 	}
 
-	glGenBuffers(1, &m_VBO_ProxyGeo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_ProxyGeo);
+	glGenBuffers(1, &m_VBOGridMesh);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (pointCountX - 1) * (pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
 
 	delete[] point;
@@ -430,16 +430,6 @@ void Renderer::Test()
 
 void Renderer::ParticleRender()
 {
-	//glUseProgram(m_SolidRectShader);
-	//glEnableVertexAttribArray(0);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
-	//// Array에서 3개씩 끊어서 하나의 정점
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-	//// 정점 3개로 삼각형을 표현
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	//glDisableVertexAttribArray(0);
-
 	glUseProgram(m_SolidRectShader);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
@@ -454,9 +444,10 @@ void Renderer::GridMeshRender()
 {
 	glUseProgram(m_SolidRectShader);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_ProxyGeo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOGridMesh);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	// 정점 개수를 줌
-	glDrawArrays(GL_LINES, 0, m_Count_ProxyGeo);
+	glDrawArrays(GL_LINE_STRIP, 0, m_Count_GridMesh);
+	
 	glDisableVertexAttribArray(0);
 }
