@@ -23,19 +23,30 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	
+	m_ParticleShaderID = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
+
 	//Create VBOs
 	//CreateVertexBufferObjects();
-	//CreateParticleBuffer();
-	CreateGridMesh();
+	//CreateParticleBuffer(1000);
+	//CreateGridMesh();
+	CreateParticleMoveBuffer(100);
 }
 
 void Renderer::CreateVertexBufferObjects()
 {
+	float size = 0.04f;
+
 	float rect[] =
 	{
-		-0.5, -0.5, 0.f, -0.5, 0.5, 0.f, 0.5, 0.5, 0.f, //Triangle1
-		-0.5, -0.5, 0.f,  0.5, 0.5, 0.f, 0.5, -0.5, 0.f, //Triangle2
+		//Triangle1
+		-size, -size, 0.f, 0.5f,
+		-size, size, 0.f, 0.5f,
+		size, size, 0.f, 0.5f,
+
+		//Triangle2
+		-size, -size, 0.f, 0.5f,
+		size, size, 0.f, 0.5f,
+		size, -size, 0.f, 0.5f
 	};
 
 	// id : m_VBORect
@@ -43,28 +54,37 @@ void Renderer::CreateVertexBufferObjects()
 	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18, rect, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, rect, GL_STATIC_DRAW);
 
-	//float triangle[9] =
-	//{
-	//	0.f, 0.f, 0.f,
-	//	-0.5f, -0.5f, 0.f,
-	//	0.5f, -0.5f, 0.f
-	//};
+	float Color[] =
+	{
+		// r g b a
+		1.f, 0.f, 0.f, 1.f,
+		1.f, 0.f, 0.f, 1.f,
+		1.f, 0.f, 0.f, 1.f,
 
-	//glGenBuffers(1, &m_VBOTriangle);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9, triangle, GL_STATIC_DRAW);
+		// r g b a
+		1.f, 0.f, 0.f, 1.f,
+		1.f, 0.f, 0.f, 1.f,
+		1.f, 0.f, 0.f, 1.f
+	};
+
+	// id : m_VBORect
+	glGenBuffers(1, &m_VBOColor);
+	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOColor);
+	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, Color, GL_STATIC_DRAW);
 }
 
-void Renderer::CreateParticleBuffer()
+void Renderer::CreateParticleBuffer(int ParticleCount)
 {
 	default_random_engine dre;
 	uniform_real_distribution<double> urd(-1, 1);
 
 	// (x, y, z)포지션 3개  * 사각형에 필요한 정점 6개
-	m_ParticleCount = m_ParticleCount * 3 * 6;
+	m_ParticleCount = ParticleCount * 3 * 6;
+
 	m_ParticleVertex = new float[m_ParticleCount];
 
 	for (int i = 0; i < m_ParticleCount; i += 18)
@@ -83,6 +103,7 @@ void Renderer::CreateParticleBuffer()
 		m_ParticleVertex[i + 6] = random_x + 0.02;
 		m_ParticleVertex[i + 7] = random_y - 0.02;
 		m_ParticleVertex[i + 8] = 0.f;
+
 		// 왼쪽 삼각형
 		m_ParticleVertex[i + 9] = random_x + 0.02;
 		m_ParticleVertex[i + 10] = random_y - 0.02;
@@ -187,6 +208,76 @@ void Renderer::CreateGridMesh()
 	delete[] vertices;
 }
 
+void Renderer::CreateParticleMoveBuffer(int ParticleCount)
+{
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd(-1, 1);
+
+	// (x, y, z) 포지션 + (x, y, z) 방향 * 6
+	m_ParticleMoveCount = ParticleCount * 6 * 6;
+
+	m_ParticleMoveVertex = new float[m_ParticleMoveCount];
+
+	for (int i = 0; i < m_ParticleMoveCount; i += 36)
+	{
+		float random_x = urd(dre);
+		float random_y = urd(dre);
+		float random_velocity_x = urd(dre);
+		float random_velocity_y = urd(dre);
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[i] = random_x;
+		m_ParticleMoveVertex[i + 1] = random_y;
+		m_ParticleMoveVertex[i + 2] = 0.f;
+		m_ParticleMoveVertex[i + 3] = random_velocity_x;
+		m_ParticleMoveVertex[i + 4] = random_velocity_y;
+		m_ParticleMoveVertex[i + 5] = 0.f;
+
+		m_ParticleMoveVertex[i + 6] = random_x + 0.02;
+		m_ParticleMoveVertex[i + 7] = random_y;
+		m_ParticleMoveVertex[i + 8] = 0.f;
+		m_ParticleMoveVertex[i + 9] = random_velocity_x;
+		m_ParticleMoveVertex[i + 10] = random_velocity_y;
+		m_ParticleMoveVertex[i + 11] = 0.f;
+
+		m_ParticleMoveVertex[i + 12] = random_x + 0.02;
+		m_ParticleMoveVertex[i + 13] = random_y - 0.02;
+		m_ParticleMoveVertex[i + 14] = 0.f;
+		m_ParticleMoveVertex[i + 15] = random_velocity_x;
+		m_ParticleMoveVertex[i + 16] = random_velocity_y;
+		m_ParticleMoveVertex[i + 17] = 0.f;
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[i + 18] = random_x + 0.02;
+		m_ParticleMoveVertex[i + 19] = random_y - 0.02;
+		m_ParticleMoveVertex[i + 20] = 0.f;
+		m_ParticleMoveVertex[i + 21] = random_velocity_x;
+		m_ParticleMoveVertex[i + 22] = random_velocity_y;
+		m_ParticleMoveVertex[i + 23] = 0.f;
+
+		m_ParticleMoveVertex[i + 24] = random_x;
+		m_ParticleMoveVertex[i + 25] = random_y - 0.02;
+		m_ParticleMoveVertex[i + 26] = 0.f;
+		m_ParticleMoveVertex[i + 27] = random_velocity_x;
+		m_ParticleMoveVertex[i + 28] = random_velocity_y;
+		m_ParticleMoveVertex[i + 29] = 0.f;
+
+		m_ParticleMoveVertex[i + 30] = random_x;
+		m_ParticleMoveVertex[i + 31] = random_y;
+		m_ParticleMoveVertex[i + 32] = 0.f;
+		m_ParticleMoveVertex[i + 33] = random_velocity_x;
+		m_ParticleMoveVertex[i + 34] = random_velocity_y;
+		m_ParticleMoveVertex[i + 35] = 0.f;
+	}
+
+	glGenBuffers(1, &m_VBOParticleMove);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleMove);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
+
+	delete[] m_ParticleMoveVertex;
+}
+
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
 	//쉐이더 오브젝트 생성
@@ -209,7 +300,8 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	GLint success;
 	// ShaderObj 가 성공적으로 컴파일 되었는지 확인
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
-	if (!success) {
+	if (!success) 
+	{
 		GLchar InfoLog[1024];
 
 		//OpenGL 의 shader log 데이터를 가져옴
@@ -412,20 +504,38 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	return temp;
 }
 
+float Renderer::elapsedTime = 0.f;
+
 void Renderer::Test()
 {
+	elapsedTime += 0.001;
 	glUseProgram(m_SolidRectShader);
 
+	GLuint uTime = glGetUniformLocation(m_SolidRectShader, "u_Time");
+	// 1f : float 1개
+	glUniform1f(uTime, elapsedTime);
+
 	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	int attribColor = glGetAttribLocation(m_SolidRectShader, "a_Color");
+
+	// glEnableVertexAttribArray(0) : location 0번에 있는 a_position에 연결
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	// Array에서 3개씩 끊어서 하나의 정점을 구성해라
 	// stride : sizeof(float) * 3 : 각각 데이터 타입의 크기를 주고, 개수를 곱해야 함
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// Attribute 0번 
+	glVertexAttribPointer(attribPosition, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+
+	// location 1번에 연결
+	glEnableVertexAttribArray(attribColor);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOColor);
+	glVertexAttribPointer(attribColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+
 	// 정점 6개를 삼각형으로 그리도록 명령
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribColor);
 }
 
 void Renderer::ParticleRender()
@@ -450,4 +560,34 @@ void Renderer::GridMeshRender()
 	glDrawArrays(GL_LINE_STRIP, 0, m_Count_GridMesh);
 	
 	glDisableVertexAttribArray(0);
+}
+
+void Renderer::ParticleMoveRender()
+{
+	glUseProgram(m_ParticleShaderID);
+
+	GLuint uTime = glGetUniformLocation(m_ParticleShaderID, "u_Time");
+	// 1f : float 1개
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0005;
+	if (elapsedTime > 2.f)
+		elapsedTime = 0.f;
+
+	GLuint aPosition = glGetAttribLocation(m_ParticleShaderID, "a_Position");
+	GLuint aVel = glGetAttribLocation(m_ParticleShaderID, "a_Vel");
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aVel);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleMove);
+	// (x, y, z 방향x, 방향y, 방향z), ( . . . )
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	// aVel은 stride 시작지점을 바꾸어 주어야함 : (GLvoid*)(sizeof(float)*3)
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float)*3));
+
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleMoveCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aVel);
+
 }

@@ -29,11 +29,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Particle.vs">
+      <Filter>Code\Shader\Particle</Filter>
+    </None>
+    <None Include="Shaders\Particle.fs">
+      <Filter>Code\Shader\Particle</Filter>
+    </None>
     <None Include="Shaders\SolidRect.vs">
-      <Filter>Code\Shader</Filter>
+      <Filter>Code\Shader\SolidRect</Filter>
     </None>
     <None Include="Shaders\SolidRect.fs">
-      <Filter>Code\Shader</Filter>
+      <Filter>Code\Shader\SolidRect</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +60,12 @@
     </Filter>
     <Filter Include="Code\Renderer">
       <UniqueIdentifier>{01312811-7ad8-40ca-afa2-6091c1fccede}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\SolidRect">
+      <UniqueIdentifier>{f77be641-38c6-4aff-a216-6ff388617ee4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\Particle">
+      <UniqueIdentifier>{829b3b9a-96e2-4904-998f-9debdadc39f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

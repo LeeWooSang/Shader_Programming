@@ -16,7 +16,8 @@ void RenderScene(void)
 	// ·»´õ¸µ
 	//g_Renderer->Test();	
 	//g_Renderer->ParticleRender();
-	g_Renderer->GridMeshRender();
+	//g_Renderer->GridMeshRender();
+	g_Renderer->ParticleMoveRender();
 
 	glutSwapBuffers();
 }
