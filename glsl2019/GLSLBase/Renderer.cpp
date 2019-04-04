@@ -6,6 +6,8 @@
 #include <cassert>
 #include <random>
 
+float Renderer::elapsedTime = 0.f;
+
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
@@ -24,12 +26,15 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_ParticleShaderID = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
+	m_ParticleFlyShaderID = CompileShaders("./Shaders/ParticleFly.vs", "./Shaders/ParticleFly.fs");
 
 	//Create VBOs
 	//CreateVertexBufferObjects();
 	//CreateParticleBuffer(1000);
 	//CreateGridMesh();
-	CreateParticleMoveBuffer(100);
+	//CreateParticleMoveBuffer(1000);
+	//CreateParticleStartLifeTimeBuffer(1000);
+	CreateParticleFlyBuffer(500000);
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -214,65 +219,284 @@ void Renderer::CreateParticleMoveBuffer(int ParticleCount)
 	default_random_engine dre(seed());
 	uniform_real_distribution<double> urd(-1, 1);
 
-	// (x, y, z) 포지션 + (x, y, z) 방향 * 6
+	// (x, y, z) 포지션 + (x, y, z) 방향  = 6;
 	m_ParticleMoveCount = ParticleCount * 6 * 6;
 
 	m_ParticleMoveVertex = new float[m_ParticleMoveCount];
+	int index = 0;
 
-	for (int i = 0; i < m_ParticleMoveCount; i += 36)
+	for (int i = 0; i < m_ParticleMoveCount; i += 48)
 	{
 		float random_x = urd(dre);
 		float random_y = urd(dre);
 		float random_velocity_x = urd(dre);
 		float random_velocity_y = urd(dre);
+		float random_velocity_z = urd(dre);
 
 		// 오른쪽 삼각형
-		m_ParticleMoveVertex[i] = random_x;
-		m_ParticleMoveVertex[i + 1] = random_y;
-		m_ParticleMoveVertex[i + 2] = 0.f;
-		m_ParticleMoveVertex[i + 3] = random_velocity_x;
-		m_ParticleMoveVertex[i + 4] = random_velocity_y;
-		m_ParticleMoveVertex[i + 5] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 
-		m_ParticleMoveVertex[i + 6] = random_x + 0.02;
-		m_ParticleMoveVertex[i + 7] = random_y;
-		m_ParticleMoveVertex[i + 8] = 0.f;
-		m_ParticleMoveVertex[i + 9] = random_velocity_x;
-		m_ParticleMoveVertex[i + 10] = random_velocity_y;
-		m_ParticleMoveVertex[i + 11] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 
-		m_ParticleMoveVertex[i + 12] = random_x + 0.02;
-		m_ParticleMoveVertex[i + 13] = random_y - 0.02;
-		m_ParticleMoveVertex[i + 14] = 0.f;
-		m_ParticleMoveVertex[i + 15] = random_velocity_x;
-		m_ParticleMoveVertex[i + 16] = random_velocity_y;
-		m_ParticleMoveVertex[i + 17] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 
 		// 오른쪽 삼각형
-		m_ParticleMoveVertex[i + 18] = random_x + 0.02;
-		m_ParticleMoveVertex[i + 19] = random_y - 0.02;
-		m_ParticleMoveVertex[i + 20] = 0.f;
-		m_ParticleMoveVertex[i + 21] = random_velocity_x;
-		m_ParticleMoveVertex[i + 22] = random_velocity_y;
-		m_ParticleMoveVertex[i + 23] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 
-		m_ParticleMoveVertex[i + 24] = random_x;
-		m_ParticleMoveVertex[i + 25] = random_y - 0.02;
-		m_ParticleMoveVertex[i + 26] = 0.f;
-		m_ParticleMoveVertex[i + 27] = random_velocity_x;
-		m_ParticleMoveVertex[i + 28] = random_velocity_y;
-		m_ParticleMoveVertex[i + 29] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 
-		m_ParticleMoveVertex[i + 30] = random_x;
-		m_ParticleMoveVertex[i + 31] = random_y;
-		m_ParticleMoveVertex[i + 32] = 0.f;
-		m_ParticleMoveVertex[i + 33] = random_velocity_x;
-		m_ParticleMoveVertex[i + 34] = random_velocity_y;
-		m_ParticleMoveVertex[i + 35] = 0.f;
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
 	}
 
 	glGenBuffers(1, &m_VBOParticleMove);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleMove);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
+
+	delete[] m_ParticleMoveVertex;
+}
+
+void Renderer::CreateParticleStartLifeTimeBuffer(int ParticleCount)
+{
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd(-1, 1);
+	uniform_real_distribution<double> urd_Time(0, 3);
+
+	// (x, y, z) 포지션 + (x, y, z) 방향  + 시작시간, lifeTime 2 = 8
+	m_ParticleMoveCount = ParticleCount * 8 * 6;
+
+	m_ParticleMoveVertex = new float[m_ParticleMoveCount];
+	int index = 0;
+
+	for (int i = 0; i < m_ParticleMoveCount; i += 48)
+	{
+		float random_x = urd(dre);
+		float random_y = urd(dre);
+		float random_velocity_x = urd(dre);
+		float random_velocity_y = urd(dre);
+		float random_velocity_z = urd(dre);
+		float random_startTime = urd_Time(dre);
+		float random_lifeTime = urd_Time(dre);
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = random_x + 0.02;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y - 0.02;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+
+		m_ParticleMoveVertex[index++] = random_x;
+		m_ParticleMoveVertex[index++] = random_y;
+		m_ParticleMoveVertex[index++] = 0.f;
+		m_ParticleMoveVertex[index++] = random_velocity_x;
+		m_ParticleMoveVertex[index++] = random_velocity_y;
+		m_ParticleMoveVertex[index++] = random_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+	}
+
+	glGenBuffers(1, &m_VBOParticleMove);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleMove);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
+
+	delete[] m_ParticleMoveVertex;
+}
+
+void Renderer::CreateParticleFlyBuffer(int ParticleCount)
+{
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd_Velocity(0, 1);
+	uniform_real_distribution<double> urd_Time(0, 3);
+	uniform_real_distribution<double> urd_Ratio(1, 6);
+	uniform_real_distribution<double> urd_Amplitude(0, 1);
+	uniform_real_distribution<double> urd_Value(0, 1);
+
+	int RectVertexSize = 6;
+	int AttributeSize = 11;
+
+	m_ParticleMoveCount = ParticleCount * RectVertexSize * AttributeSize;
+	m_ParticleMoveVertex = new float[m_ParticleMoveCount];
+	int index = 0;
+
+	float ratio = 0.f, am = 0.f;
+	float ratioMin = 2.f;
+	float ratioThres = 4.f;
+	float amMin = 0.1f;
+	float amThres = 1.f;
+
+	for (int i = 0; i < m_ParticleMoveCount; i += RectVertexSize * AttributeSize)
+	{
+		//ratio = ratioMin * (((float)rand() / (float)RAND_MAX)) * ratioThres;
+		//am = amMin * (((float)rand() / (float)RAND_MAX)) * amThres;
+		//cout << ratio << ", " << am << endl;
+
+		// x, y, z 좌표
+		float x = 0.f, y = 0.f, z = 0.f;
+		// 사각형 폭
+		float size = 0.001f;
+
+		float ranodm_velocity_x = urd_Velocity(dre);
+		float ranodm_velocity_y = urd_Velocity(dre);
+		float ranodm_velocity_z = urd_Velocity(dre);
+
+		float random_startTime = urd_Time(dre);
+		float random_lifeTime = urd_Time(dre);
+
+		float random_ratio = urd_Ratio(dre);
+		float random_amplitude = urd_Amplitude(dre);
+
+		float random_value = urd_Value(dre);
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;	
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+
+	}
+
+	glGenBuffers(1, &m_VBOParticleFly);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleFly);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
 
 	delete[] m_ParticleMoveVertex;
@@ -388,6 +612,7 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 
 	return ShaderProgram;
 }
+
 unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight)
 {
 	std::cout << "Loading bmp file " << imagepath << " ... " << std::endl;
@@ -504,11 +729,10 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	return temp;
 }
 
-float Renderer::elapsedTime = 0.f;
-
 void Renderer::Test()
 {
 	elapsedTime += 0.001;
+
 	glUseProgram(m_SolidRectShader);
 
 	GLuint uTime = glGetUniformLocation(m_SolidRectShader, "u_Time");
@@ -569,9 +793,7 @@ void Renderer::ParticleMoveRender()
 	GLuint uTime = glGetUniformLocation(m_ParticleShaderID, "u_Time");
 	// 1f : float 1개
 	glUniform1f(uTime, elapsedTime);
-	elapsedTime += 0.0005;
-	if (elapsedTime > 2.f)
-		elapsedTime = 0.f;
+	elapsedTime += 0.0001;
 
 	GLuint aPosition = glGetAttribLocation(m_ParticleShaderID, "a_Position");
 	GLuint aVel = glGetAttribLocation(m_ParticleShaderID, "a_Vel");
@@ -584,10 +806,79 @@ void Renderer::ParticleMoveRender()
 	// aVel은 stride 시작지점을 바꾸어 주어야함 : (GLvoid*)(sizeof(float)*3)
 	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float)*3));
 
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleMoveCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aVel);
+}
+
+void Renderer::ParticleStartLifeTimeRender()
+{
+	glUseProgram(m_ParticleShaderID);
+
+	GLuint uTime = glGetUniformLocation(m_ParticleShaderID, "u_Time");
+	// 1f : float 1개
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0001;
+	GLuint uRepeat = glGetUniformLocation(m_ParticleShaderID, "u_Repeat");
+	//glUniform1f
+
+	GLuint aPosition = glGetAttribLocation(m_ParticleShaderID, "a_Position");
+	GLuint aVel = glGetAttribLocation(m_ParticleShaderID, "a_Vel");
+	GLuint aStartLifeTime = glGetAttribLocation(m_ParticleShaderID, "a_StartLifeTime");
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aStartLifeTime);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleMove);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLifeTime, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
 
 	// 정점 개수를 줌
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleMoveCount);
 	glDisableVertexAttribArray(aPosition);
 	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aStartLifeTime);
+}
 
+void Renderer::ParticleFlyRender()
+{
+	GLuint shaderID = m_ParticleFlyShaderID;
+
+	glUseProgram(shaderID);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+	GLuint aVel = glGetAttribLocation(shaderID, "a_Velocity");
+	GLuint aStartLifeTime = glGetAttribLocation(shaderID, "a_StartLifeTime");
+	GLuint aAmplitude = glGetAttribLocation(shaderID, "a_Amplitude");
+	GLuint aRandomValue = glGetAttribLocation(shaderID, "a_RandomValue");
+
+	GLuint uTime = glGetUniformLocation(shaderID, "u_Time");
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0005;
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aStartLifeTime);
+	glEnableVertexAttribArray(aAmplitude);
+	glEnableVertexAttribArray(aRandomValue);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleFly);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLifeTime, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aAmplitude, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 8));
+	glVertexAttribPointer(aRandomValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 11, (GLvoid*)(sizeof(float) * 10));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleMoveCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aStartLifeTime);
+	glDisableVertexAttribArray(aAmplitude);
+	glDisableVertexAttribArray(aRandomValue);
 }

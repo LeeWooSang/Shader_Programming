@@ -24,6 +24,8 @@ public:
 	void ParticleRender();
 	void GridMeshRender();
 	void ParticleMoveRender();
+	void ParticleStartLifeTimeRender();
+	void ParticleFlyRender();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -34,7 +36,8 @@ private:
 	void CreateVertexBufferObjects();
 	void CreateParticleBuffer(int);
 	void CreateParticleMoveBuffer(int);
-
+	void CreateParticleStartLifeTimeBuffer(int);
+	void CreateParticleFlyBuffer(int);
 	void CreateGridMesh();
 
 	unsigned char* loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight);
@@ -47,24 +50,25 @@ private:
 	// ºŒ¿Ã¥ı ID
 	GLuint m_SolidRectShader = 0;
 	GLuint m_ParticleShaderID = 0;
+	GLuint m_ParticleFlyShaderID = 0;
 
 	GLuint m_VBORect = 0;
 	GLuint m_VBOColor = 0;
-
 	GLuint m_VBOTriangle = 0;
+	GLuint m_VBOParticle = 0;
+	GLuint m_VBOGridMesh = 0;
+	GLuint m_VBOParticleMove = 0;
+	GLuint m_VBOParticleFly = 0;
 
 	float* m_ParticleVertex{ nullptr };
 	int m_ParticleCount = 0;
-	GLuint m_VBOParticle = 0;
 
-	GLuint m_VBOGridMesh = 0;
 	int m_Count_GridMesh = 0;
-
-	static float elapsedTime;
 
 	float m_Velocity;
 	float* m_ParticleMoveVertex{ nullptr };
 	int m_ParticleMoveCount = 0;
-	GLuint m_VBOParticleMove = 0;
+
+	static float elapsedTime;
 };
 

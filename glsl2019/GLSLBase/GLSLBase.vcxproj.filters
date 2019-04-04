@@ -41,6 +41,12 @@
     <None Include="Shaders\SolidRect.fs">
       <Filter>Code\Shader\SolidRect</Filter>
     </None>
+    <None Include="Shaders\ParticleFly.fs">
+      <Filter>Code\Shader\ParticleFly</Filter>
+    </None>
+    <None Include="Shaders\ParticleFly.vs">
+      <Filter>Code\Shader\ParticleFly</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -66,6 +72,9 @@
     </Filter>
     <Filter Include="Code\Shader\Particle">
       <UniqueIdentifier>{829b3b9a-96e2-4904-998f-9debdadc39f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\ParticleFly">
+      <UniqueIdentifier>{adb133a2-2433-40a4-b5d8-028716158fb1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
