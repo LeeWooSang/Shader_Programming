@@ -173,12 +173,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\CheckerBoard.fs" />
+    <None Include="Shaders\CheckerBoard.vs" />
+    <None Include="Shaders\FillAll.fs" />
+    <None Include="Shaders\FillAll.vs" />
     <None Include="Shaders\Particle.fs" />
     <None Include="Shaders\Particle.vs" />
     <None Include="Shaders\ParticleFly.fs" />
     <None Include="Shaders\ParticleFly.vs" />
+    <None Include="Shaders\ParticleRandomColor.fs" />
+    <None Include="Shaders\ParticleRandomColor.vs" />
+    <None Include="Shaders\Rader.fs" />
+    <None Include="Shaders\Rader.vs" />
     <None Include="Shaders\SolidRect.fs" />
     <None Include="Shaders\SolidRect.vs" />
+    <None Include="Shaders\TextureRect.fs" />
+    <None Include="Shaders\TextureRect.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

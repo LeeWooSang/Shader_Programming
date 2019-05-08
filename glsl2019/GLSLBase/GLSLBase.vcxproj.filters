@@ -47,6 +47,36 @@
     <None Include="Shaders\ParticleFly.vs">
       <Filter>Code\Shader\ParticleFly</Filter>
     </None>
+    <None Include="Shaders\FillAll.fs">
+      <Filter>Code\Shader\FillAll</Filter>
+    </None>
+    <None Include="Shaders\FillAll.vs">
+      <Filter>Code\Shader\FillAll</Filter>
+    </None>
+    <None Include="Shaders\TextureRect.fs">
+      <Filter>Code\Shader\TextureRect</Filter>
+    </None>
+    <None Include="Shaders\TextureRect.vs">
+      <Filter>Code\Shader\TextureRect</Filter>
+    </None>
+    <None Include="Shaders\ParticleRandomColor.fs">
+      <Filter>Code\Shader\ParticleRandomColor</Filter>
+    </None>
+    <None Include="Shaders\ParticleRandomColor.vs">
+      <Filter>Code\Shader\ParticleRandomColor</Filter>
+    </None>
+    <None Include="Shaders\Rader.fs">
+      <Filter>Code\Shader\Rader</Filter>
+    </None>
+    <None Include="Shaders\Rader.vs">
+      <Filter>Code\Shader\Rader</Filter>
+    </None>
+    <None Include="Shaders\CheckerBoard.fs">
+      <Filter>Code\Shader\CheckerBoard</Filter>
+    </None>
+    <None Include="Shaders\CheckerBoard.vs">
+      <Filter>Code\Shader\CheckerBoard</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -75,6 +105,21 @@
     </Filter>
     <Filter Include="Code\Shader\ParticleFly">
       <UniqueIdentifier>{adb133a2-2433-40a4-b5d8-028716158fb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\FillAll">
+      <UniqueIdentifier>{a64554c1-2131-478e-a47b-f7100164445a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\TextureRect">
+      <UniqueIdentifier>{552126e6-f611-4af7-a78b-2a796acc49aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\ParticleRandomColor">
+      <UniqueIdentifier>{9a27df31-8f0a-406e-9caf-0eea70bea75e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\Rader">
+      <UniqueIdentifier>{f4744367-bd82-4715-a443-0c395d92b9d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Shader\CheckerBoard">
+      <UniqueIdentifier>{63afd9c9-a4ba-4321-bd56-7c90ecef490a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

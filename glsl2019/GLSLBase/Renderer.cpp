@@ -27,14 +27,24 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_ParticleShaderID = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
 	m_ParticleFlyShaderID = CompileShaders("./Shaders/ParticleFly.vs", "./Shaders/ParticleFly.fs");
+	m_ParticleRandomColorShaderID = CompileShaders("./Shaders/ParticleRandomColor.vs", "./Shaders/ParticleRandomColor.fs");;
+	m_RaderShaderID = CompileShaders("./Shaders/Rader.vs", "./Shaders/Rader.fs");
+	m_FillAllShaderID = CompileShaders("./Shaders/FillAll.vs", "./Shaders/FillAll.fs");
+	m_TextureRectShaderID = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
+	m_TextureCheckerBoardShaderID = CompileShaders("./Shaders/CheckerBoard.vs", "./Shaders/CheckerBoard.fs");
 
-	//Create VBOs
+	m_ParticleTextureID0 = CreatePngTexture("./Textures/Tower.png");
+	m_RGBTextureID = CreatePngTexture("./Textures/RGB.png");
 	//CreateVertexBufferObjects();
 	//CreateParticleBuffer(1000);
 	//CreateGridMesh();
 	//CreateParticleMoveBuffer(1000);
 	//CreateParticleStartLifeTimeBuffer(1000);
-	CreateParticleFlyBuffer(500000);
+	//CreateParticleFlyBuffer(100000);
+	//CreateParticleRandomColor(10000);
+	//CreateRader(1);
+	//CreateTextureMesh(1);
+	CreateTextureCheckerBoard(1);
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -404,7 +414,7 @@ void Renderer::CreateParticleFlyBuffer(int ParticleCount)
 		// x, y, z 좌표
 		float x = 0.f, y = 0.f, z = 0.f;
 		// 사각형 폭
-		float size = 0.001f;
+		float size = 0.005f;
 
 		float ranodm_velocity_x = urd_Velocity(dre);
 		float ranodm_velocity_y = urd_Velocity(dre);
@@ -500,6 +510,415 @@ void Renderer::CreateParticleFlyBuffer(int ParticleCount)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
 
 	delete[] m_ParticleMoveVertex;
+}
+
+void Renderer::CreateParticleRandomColor(int ParticleCount)
+{
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd_Velocity(0, 1);
+	uniform_real_distribution<double> urd_Time(0, 1);
+	uniform_real_distribution<double> urd_Ratio(1, 6);
+	// 진폭
+	uniform_real_distribution<double> urd_Amplitude(0, 1);
+	uniform_real_distribution<double> urd_Value(0, 1);
+	uniform_real_distribution<double> urd_Color(0, 1);
+
+	int RectVertexSize = 6;
+	int AttributeSize = 15;
+	
+	m_ParticleMoveCount = ParticleCount * RectVertexSize * AttributeSize;
+	m_ParticleMoveVertex = new float[m_ParticleMoveCount];
+	int index = 0;
+
+	float ratio = 0.f, am = 0.f;
+	float ratioMin = 2.f;
+	float ratioThres = 4.f;
+	float amMin = 0.1f;
+	float amThres = 1.f;
+
+	for (int i = 0; i < m_ParticleMoveCount; i += RectVertexSize * AttributeSize)
+	{
+		// 사각형 폭(원의 지름)
+		float size = 0.01f;
+
+		// x, y, z 좌표
+		float x = 0.f, y = 0.f, z = 0.f;
+
+		float ranodm_velocity_x = urd_Velocity(dre);
+		float ranodm_velocity_y = urd_Velocity(dre);
+		float ranodm_velocity_z = urd_Velocity(dre);
+
+		float random_startTime = urd_Time(dre);
+		float random_lifeTime = urd_Time(dre);
+
+		float random_ratio = urd_Ratio(dre);
+		float random_amplitude = urd_Amplitude(dre);
+
+		float random_value = urd_Value(dre);
+
+		float random_colorR = urd_Color(dre);
+		float random_colorG = urd_Color(dre);
+		float random_colorB = urd_Color(dre);
+		float random_colorA = 1;
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+
+		// 오른쪽 삼각형
+		m_ParticleMoveVertex[index++] = x + size;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y - size;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+
+		m_ParticleMoveVertex[index++] = x;
+		m_ParticleMoveVertex[index++] = y;
+		m_ParticleMoveVertex[index++] = z;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_x;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_y;
+		m_ParticleMoveVertex[index++] = ranodm_velocity_z;
+		m_ParticleMoveVertex[index++] = random_startTime;
+		m_ParticleMoveVertex[index++] = random_lifeTime;
+		m_ParticleMoveVertex[index++] = random_ratio;
+		m_ParticleMoveVertex[index++] = random_amplitude;
+		m_ParticleMoveVertex[index++] = random_value;
+		m_ParticleMoveVertex[index++] = random_colorR;
+		m_ParticleMoveVertex[index++] = random_colorG;
+		m_ParticleMoveVertex[index++] = random_colorB;
+		m_ParticleMoveVertex[index++] = random_colorA;
+	}
+
+	glGenBuffers(1, &m_VBOParticleRandomColor);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleRandomColor);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_ParticleMoveCount, m_ParticleMoveVertex, GL_STATIC_DRAW);
+
+	delete[] m_ParticleMoveVertex;
+}
+
+void Renderer::CreateRader(int RectCount)
+{
+	int RectVertexSize = 6;
+	int AttributeSize = 5;
+	m_RectCount = RectCount * RectVertexSize * AttributeSize;
+
+	float* pVertices = new float[m_RectCount];
+
+	random_device seed;
+	default_random_engine dre(seed());
+
+	int index = 0;
+	for (int i = 0; i < m_RectCount; i += RectVertexSize * AttributeSize)
+	{
+		float size = 2.f;
+		float x = -1.f, y = 1.f, z = 0.f;
+		float random_u = - 0.5;
+		float random_v = 0.5;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+	}
+
+	// id : m_VBORect
+	glGenBuffers(1, &m_VBORader);
+	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORader);
+	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_RectCount, pVertices, GL_STATIC_DRAW);
+
+	delete[] pVertices;
+}
+
+void Renderer::CreateTextureMesh(int RectCount)
+{
+	int RectVertexSize = 6;
+	int AttributeSize = 9;
+	m_RectCount = RectCount * RectVertexSize * AttributeSize;
+
+	float* pVertices = new float[m_RectCount];
+
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd_Color(0, 1);
+	uniform_real_distribution<double> urd_UV(0, 1);
+
+	int index = 0;
+	for (int i = 0; i < m_RectCount; i += RectVertexSize * AttributeSize)
+	{
+		float size = 1.f;
+		float x = -0.5f, y = 0.5, z = 0.f;
+		float random_colorR = urd_Color(dre);
+		float random_colorG = urd_Color(dre);
+		float random_colorB = urd_Color(dre);
+		float random_colorA = 1;
+		//float random_u = urd_UV(dre);
+		//float random_v = urd_UV(dre);
+		float random_u = 0;
+		float random_v = 0;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = random_colorR;
+		pVertices[index++] = random_colorG;
+		pVertices[index++] = random_colorB;
+		pVertices[index++] = random_colorA;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+	}
+
+	// id : m_VBORect
+	glGenBuffers(1, &m_VBOTextureRect);
+	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_RectCount, pVertices, GL_STATIC_DRAW);
+
+	delete[] pVertices;
+}
+
+void Renderer::CreateTextureCheckerBoard(int RectCount)
+{
+	int RectVertexSize = 6;
+	int AttributeSize = 5;
+	m_RectCount = RectCount * RectVertexSize * AttributeSize;
+
+	float* pVertices = new float[m_RectCount];
+
+	random_device seed;
+	default_random_engine dre(seed());
+	uniform_real_distribution<double> urd_Color(0, 1);
+	uniform_real_distribution<double> urd_UV(0, 1);
+
+	int index = 0;
+	for (int i = 0; i < m_RectCount; i += RectVertexSize * AttributeSize)
+	{
+		float size = 1.f;
+		float x = -0.5f, y = 0.5, z = 0.f;
+		float random_u = 0;
+		float random_v = 0;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 1.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x + size;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 1.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y - size;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 0.f;
+
+		pVertices[index++] = x;
+		pVertices[index++] = y;
+		pVertices[index++] = z;
+		pVertices[index++] = 0.f;
+		pVertices[index++] = 1.f;
+	}
+
+	// id : m_VBORect
+	glGenBuffers(1, &m_VBOTextureRect);
+	//	m_VBORect를 ARRAY_BUFFER로 사용하겠다고 알려줌
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+	// 사이즈를 넣어줄 때는 실제 사이즈를 넣어주는 것이 보편적
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_RectCount, pVertices, GL_STATIC_DRAW);
+
+	delete[] pVertices;
+
+	static const GLulong checkerboard[] =
+	{
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+	0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF
+	};
+
+	glGenTextures(1, &m_CheckerBoardTextureID);
+	glBindTexture(GL_TEXTURE_2D, m_CheckerBoardTextureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -724,7 +1143,7 @@ GLuint Renderer::CreateBmpTexture(char * filePath)
 	glBindTexture(GL_TEXTURE_2D, temp);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp);
 
 	return temp;
 }
@@ -881,4 +1300,186 @@ void Renderer::ParticleFlyRender()
 	glDisableVertexAttribArray(aStartLifeTime);
 	glDisableVertexAttribArray(aAmplitude);
 	glDisableVertexAttribArray(aRandomValue);
+}
+
+void Renderer::ParticleRandomColorRender()
+{
+	GLuint shaderID = m_ParticleRandomColorShaderID;
+	glUseProgram(shaderID);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+	GLuint aVel = glGetAttribLocation(shaderID, "a_Velocity");
+	GLuint aStartLifeTime = glGetAttribLocation(shaderID, "a_StartLifeTime");
+	GLuint aAmplitude = glGetAttribLocation(shaderID, "a_Amplitude");
+	GLuint aRandomValue = glGetAttribLocation(shaderID, "a_RandomValue");
+	GLuint aRandomColor = glGetAttribLocation(shaderID, "a_RandomColor");
+
+	GLuint uTime = glGetUniformLocation(shaderID, "u_Time");
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0005;
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aVel);
+	glEnableVertexAttribArray(aStartLifeTime);
+	glEnableVertexAttribArray(aAmplitude);
+	glEnableVertexAttribArray(aRandomValue);
+	glEnableVertexAttribArray(aRandomColor);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticleRandomColor);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aVel, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aStartLifeTime, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(aAmplitude, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 8));
+	glVertexAttribPointer(aRandomValue, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 10));
+	glVertexAttribPointer(aRandomColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 15, (GLvoid*)(sizeof(float) * 11));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleMoveCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aVel);
+	glDisableVertexAttribArray(aStartLifeTime);
+	glDisableVertexAttribArray(aAmplitude);
+	glDisableVertexAttribArray(aRandomValue);
+	glDisableVertexAttribArray(aRandomColor);
+}
+
+void Renderer::RaderRender()
+{
+	GLuint shaderID = m_RaderShaderID;
+	glUseProgram(shaderID);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+	GLuint aUV = glGetAttribLocation(shaderID, "a_UV");
+
+	GLfloat points[] = 
+	{
+		0.0f, 0.0f, 
+		0.5f, 0.5f,
+		0.3f, 0.3f, 
+		-0.2f, -0.2f, 
+		-0.3f, -0.3f
+	};
+	GLuint uPoints = glGetUniformLocation(shaderID, "u_Points");
+	// vec2 벡터 5개
+	glUniform2fv(uPoints, 5, points);
+
+	GLuint uTime = glGetUniformLocation(shaderID, "u_Time");
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.001;
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aUV);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORader);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_RectCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aUV);
+}
+
+void Renderer::FillAll(float alpha)
+{
+	GLuint shaderID = m_FillAllShaderID;
+	glUseProgram(shaderID);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+
+	glEnableVertexAttribArray(aPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 0));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_RectCount);
+	glDisableVertexAttribArray(aPosition);
+}
+
+void Renderer::TextureRectRender()
+{
+	GLuint shaderID = m_TextureRectShaderID;
+	glUseProgram(shaderID);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+	GLuint aColor = glGetAttribLocation(shaderID, "a_Color");
+	GLuint aUV = glGetAttribLocation(shaderID, "a_UV");
+
+	// 텍스처 uniform
+	int uniformTex = glGetUniformLocation(shaderID, "u_Texture");
+	glUniform1i(uniformTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_ParticleTextureID0);
+
+	GLuint uTime = glGetUniformLocation(shaderID, "u_Time");
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0005;
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aColor);
+	glEnableVertexAttribArray(aUV);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 7));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_RectCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aColor);
+	glDisableVertexAttribArray(aUV);
+}
+
+void Renderer::TextureCheckerBoardRender()
+{
+	GLuint shaderID = m_TextureCheckerBoardShaderID;
+	glUseProgram(shaderID);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint aPosition = glGetAttribLocation(shaderID, "a_Position");
+	GLuint aUV = glGetAttribLocation(shaderID, "a_UV");
+
+	// 텍스처 uniform
+	int uniformTex = glGetUniformLocation(shaderID, "u_Texture");
+	glUniform1i(uniformTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, m_CheckerBoardTextureID);
+	//glBindTexture(GL_TEXTURE_2D, m_ParticleTextureID0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTextureID);
+
+	GLuint uTime = glGetUniformLocation(shaderID, "u_Time");
+	glUniform1f(uTime, elapsedTime);
+	elapsedTime += 0.0005;
+
+	glEnableVertexAttribArray(aPosition);
+	glEnableVertexAttribArray(aUV);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTextureRect);
+
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
+	glVertexAttribPointer(aUV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	// 정점 개수를 줌
+	glDrawArrays(GL_TRIANGLES, 0, m_RectCount);
+	glDisableVertexAttribArray(aPosition);
+	glDisableVertexAttribArray(aUV);
 }

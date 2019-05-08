@@ -10,8 +10,11 @@ int g_WindowSizeY = 500;
 
 void RenderScene(void)
 {
+	// 클리어를 일부만 적용할 수 있음
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	
+	//g_Renderer->FillAll(0.2);
 
 	// 렌더링
 	//g_Renderer->Test();	
@@ -19,8 +22,11 @@ void RenderScene(void)
 	//g_Renderer->GridMeshRender();
 	//g_Renderer->ParticleMoveRender();
 	//g_Renderer->ParticleStartLifeTimeRender();
-	g_Renderer->ParticleFlyRender();
-
+	//g_Renderer->ParticleFlyRender();
+	//g_Renderer->ParticleRandomColorRender();
+	//g_Renderer->RaderRender();
+	//g_Renderer->TextureRectRender();
+	g_Renderer->TextureCheckerBoardRender();
 
 	glutSwapBuffers();
 }
